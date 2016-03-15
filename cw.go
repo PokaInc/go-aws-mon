@@ -57,6 +57,16 @@ func getDimensions(metadata map[string]string) (ret []*cloudwatch.Dimension) {
 		_ret = append(_ret, &dim)
 	}
 
+        autoScalingGroupNameName := "AutoScalingGroupName"
+        autoScalingGroupNameValue, ok := metadata["autoScalingGroupName"]
+        if ok {
+                dim := cloudwatch.Dimension{
+                        Name:  aws.String(autoScalingGroupNameName),
+                        Value: aws.String(autoScalingGroupNameValue),
+                }
+                _ret = append(_ret, &dim)
+        }
+
 	return _ret
 }
 
