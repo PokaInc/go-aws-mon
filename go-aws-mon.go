@@ -21,6 +21,7 @@ func main() {
 
 	ns := flag.String("namespace", "Linux/System", "CloudWatch metric namespace (required)(It is always EC2)")
 	diskPaths := flag.String("disk-path", "/", "Disk Path")
+	asg := flag.String("autoscaling-group-name", "undefined", "Specify in which autoscaling group the instance is from if applicable.")
 
 	flag.Parse()
 
@@ -30,6 +31,8 @@ func main() {
 		log.Fatal("Can't get InstanceData, please confirm we are running on a AWS EC2 instance: ", err)
 		os.Exit(1)
 	}
+
+	metadata["autoScalingGroupName"] = *asg
 
 	memUtil, memUsed, memAvail, swapUtil, swapUsed, err := memoryUsage()
 
