@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"os"
 )
 
 func getDimensions(metadata map[string]string) (ret []*cloudwatch.Dimension) {
@@ -77,6 +76,11 @@ func addMetric(name, unit string, value float64, dimensions []*cloudwatch.Dimens
 		Value:      aws.Float64(value),
 		Dimensions: dimensions,
 	}
+
+	b, _ := json.Marshal(_metric)
+	os.Stdout.Write(b)
+	os.Stdout.WriteString("\n")
+
 	metricData = append(metricData, &_metric)
 	return metricData, nil
 }
@@ -85,13 +89,14 @@ func putMetric(metricdata []*cloudwatch.MetricDatum, namespace, region string) e
 
 	session := session.New(&aws.Config{Region: &region})
 	svc := cloudwatch.New(session)
+	
 
 	metric_input := &cloudwatch.PutMetricDataInput{
 		MetricData: metricdata,
 		Namespace:  aws.String(namespace),
 	}
 
-	resp, err := svc.PutMetricData(metric_input)
+	_, err := svc.PutMetricData(metric_input)
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
 			return fmt.Errorf("[%s] %s", awsErr.Code, awsErr.Message)
@@ -99,7 +104,6 @@ func putMetric(metricdata []*cloudwatch.MetricDatum, namespace, region string) e
 			return err
 		}
 	}
-	log.Println(awsutil.StringValue(resp))
 	return nil
 }
 
